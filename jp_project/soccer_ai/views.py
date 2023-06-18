@@ -48,13 +48,13 @@ class LogoutView(View):
 class HomeView(View):
     
     def get(self, request):
-        print(request.user.is_authenticated)
-        img_src = ""
-        if request.session.get("user") != None:
+        if request.session.get("user") == None:
+            return render(request,"soccer_ai/login.html",{})
+        else:
             img_src = request.session.get("user").get("userinfo").get("picture")
-        return render(request,"soccer_ai/home.html",{
-            "session":request.session.get("user"),
-            "pretty":json.dumps(request.session.get("user"), indent=4),
-            "img_src":img_src
+            return render(request,"soccer_ai/home.html",{
+                "session":request.session.get("user"),
+                "pretty":json.dumps(request.session.get("user"), indent=4),
+                "img_src":img_src
 
-        })
+            })
