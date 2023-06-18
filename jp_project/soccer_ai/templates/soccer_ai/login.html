@@ -5,18 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome</title>
 
+    {% load static %}
+    <style>
+        body{
+            background-image: url("{% static 'soccer_ai/bg_proof.jpg' %}");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+    <link rel="shortcut icon" type="image/png" href="{% static 'soccer_ai/favicon/favicon.ico' %}" >
     {% load bootstrap5 %}
-    {{ bootstrap_css }}
-    {{ bootstrap_javascript }}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="flex flex-col">
-            <p class="text-center fs-1">Soccer AI</p>
-            <p class="text-center fs-6 badge bg-primary"><a href="{% url 'login' %}">Login</a></p>
-        </div>
+    <section class="vh-100">
+        
+        <div class="container-fluid h-100">
+            <div class="d-flex flex-row justify-content-between h-100">
+                <div class="w-50 h-100">
+                    
+                </div>
+                <div class="w-50 h-100 row align-items-center justify-content-center">
+                    <div class="bg-light h-50 w-50 rounded-3 row align-items-center justify-content-center border">
+                        <p class="fs-3 text-center py-0 my-0 h-auto">Soccer AI</p>
+                        <a class="btn btn-success w-50 h-auto" href="{% url 'login' %}">Login</a>
+                    </div>
+                    
 
-    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
     
 </body>
 </html>
