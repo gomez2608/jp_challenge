@@ -12,6 +12,8 @@
     {% bootstrap_javascript %}
 </head>
 <body>
-    
+    {% include 'soccer_ai/navbar.html' %}
+    {{ resp }}
+    <a class="btn btn-danger" href="{% url 'home' %}">Go back</a>
 </body>
 </html>

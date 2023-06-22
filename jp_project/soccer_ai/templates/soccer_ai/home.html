@@ -13,7 +13,7 @@
     
 </head>
 <body>
-  {% extends 'navbar.html' %}
+  {% include 'soccer_ai/navbar.html' %}
  
   <section>
     <div class="w-100 h-100 bg-light">
@@ -28,8 +28,9 @@
   </section>
   <section>
     <div class="w-100 row justify-content-center">
-      <form method="post" class="w-50 py-6">
+      <form method="get" class="w-50 py-6" action="{% url 'prompt_resp' %}">
         {{ form }}
+        <input type="text" value="{{ img_src }}" id="img_src" name="img_src" hidden>
         <input type="submit" value="Send prompt" class="btn btn-success w-auto">
       </form>
     </div>

@@ -4,6 +4,7 @@ import pandas as pd
 import datetime as dt
 import requests
 import json
+from django.conf import settings
 
 
 nlp = spacy.load("en_core_web_sm")
@@ -168,7 +169,7 @@ class ResponseGenerator(PromptProcessor):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "Authorization": "Bearer CdEsGgI9MOPIVR6ZXspKpnq1W1Pw7doe"
+        "Authorization": "Bearer "+settings.AI_API_KEY
     }
 
 
@@ -177,7 +178,6 @@ class ResponseGenerator(PromptProcessor):
     def generate_response(self,prompt):
         ans = self.get_answer(prompt)
         entit = self.get_entities(prompt)
-        print(entit["ENT"])
 
         team, matches = ans
 

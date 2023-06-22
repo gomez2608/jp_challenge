@@ -27,6 +27,7 @@ DB_NAME = os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 API_KEY = os.environ.get("API_KEY")
+AI_API_KEY = os.environ.get("AI_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production

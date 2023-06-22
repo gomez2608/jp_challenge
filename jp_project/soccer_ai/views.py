@@ -11,6 +11,7 @@ from http.client import HTTPSConnection
 import json
 from django.forms import *
 from .analyzer import ResponseGenerator
+import os
 
 
 
@@ -37,7 +38,6 @@ headers = {
 
 class LoginView(View):
     def get(self,request):
-        print(request.build_absolute_uri(reverse("callback")))
         return oauth.auth0.authorize_redirect(
             request,request.build_absolute_uri(reverse("callback"))
         )
@@ -72,7 +72,6 @@ class HomeView(View):
             countries_data = data.get("response")
             img_src = request.session.get("user").get("userinfo").get("picture")
             form = PromptForm()
-            print(form.as_p())
             return render(request,"soccer_ai/home.html",{
                 "session":request.session.get("user"),
                 "pretty":json.dumps(request.session.get("user"), indent=4),
@@ -89,10 +88,13 @@ class PromptForm(Form):
 
 class AnalizerView(View):
     def get(self,request):
-        prompt = request.GET.get("prompt","")
+        prompt = request.GET.get("input_prompt","")
+        img_src = request.GET.get("img_src","")
+        print(request.GET)
         if prompt != "":
-            response_gen = ResponseGenerator("global_db.csv")
-            resp = response_gen.get_answer(prompt)
+            
+            response_gen = ResponseGenerator("jp_project/soccer_ai/global_db.csv")
+            resp = response_gen.generate_response(prompt)
         else:
             resp = "There is no suministred prompt"
-        return render(request,"ans_view.html",{"resp":resp})
+        return render(request,"soccer_ai/ans_view.html",{"resp":resp,"img_src":img_src})
