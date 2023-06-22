@@ -13,7 +13,7 @@ from django.forms import *
 from .analyzer import ResponseGenerator
 import os
 
-
+team_ids = json.load(open("jp_project/soccer_ai/team_ids.json"))
 
 # Create your views here.
 
@@ -65,19 +65,18 @@ class HomeView(View):
         if request.session.get("user") == None:
             return render(request,"soccer_ai/login.html",{})
         else:
-            conn = HTTPSConnection("v1.volleyball.api-sports.io")
+            """conn = HTTPSConnection("v1.volleyball.api-sports.io")
             conn.request("GET", "/countries", headers=headers)
             res = conn.getresponse()
             data = json.loads(res.read().decode("utf-8"))
-            countries_data = data.get("response")
+            countries_data = data.get("response")"""
             img_src = request.session.get("user").get("userinfo").get("picture")
             form = PromptForm()
             return render(request,"soccer_ai/home.html",{
                 "session":request.session.get("user"),
                 "pretty":json.dumps(request.session.get("user"), indent=4),
                 "img_src":img_src,
-                "form":form.as_p(),
-                "countries":countries_data
+                "form":form.as_p()
 
             })
         
@@ -90,11 +89,36 @@ class AnalizerView(View):
     def get(self,request):
         prompt = request.GET.get("input_prompt","")
         img_src = request.GET.get("img_src","")
-        print(request.GET)
         if prompt != "":
             
             response_gen = ResponseGenerator("jp_project/soccer_ai/global_db.csv")
             resp = response_gen.generate_response(prompt)
+            
+            team_info = response_gen.get_answer(prompt)[0]
         else:
             resp = "There is no suministred prompt"
-        return render(request,"soccer_ai/ans_view.html",{"resp":resp,"img_src":img_src})
+
+        info_g = []
+        for i in team_info:
+            info_t = get_info(i,team_ids)
+            info_g.append(info_t)
+        return render(request,"soccer_ai/ans_view.html",{"resp":resp,"img_src":img_src,"team_info":info_g})
+    
+def get_info(team,list_ids):
+    unvalid_characters = "äëïöü"
+    valid_characters = "aeiou"
+    clean_team = ""
+    
+    for k in team.lower():
+        if k in unvalid_characters:
+            clean_team += valid_characters[unvalid_characters.index(k)]
+        else:
+            clean_team += k
+    
+    if clean_team.lower() == "bayern munchen":
+        clean_team = "bayern munich"
+    for each_team in list_ids:
+        temp = each_team["team"]
+        if clean_team.lower() == temp["name"].lower():
+            return temp
+    return {}

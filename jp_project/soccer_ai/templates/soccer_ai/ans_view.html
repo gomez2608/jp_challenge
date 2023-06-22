@@ -10,10 +10,69 @@
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    <style>
+        .typewriter p {
+        color: #000;
+        font-family: monospace;
+        overflow: hidden; /* Ensures the content is not revealed until the animation */
+        overflow-wrap: break-word;
+        border-right: .15em solid #198754; /* The typwriter cursor */
+        white-space: nowrap; /* Keeps the content on a single line */
+        margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+        letter-spacing: .05em; /* Adjust as needed */
+        text-align: start;
+        animation: 
+            typing 3.5s steps(30, end),
+            blink-caret .5s step-end infinite;
+        }
+
+        /* The typing effect */
+        @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+        }
+
+        /* The typewriter cursor effect */
+        @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: #198754 }
+        }
+    </style>
 </head>
 <body>
     {% include 'soccer_ai/navbar.html' %}
-    {{ resp }}
-    <a class="btn btn-danger" href="{% url 'home' %}">Go back</a>
+    
+    <div class="container my-3 py-3">
+        <div class="w-100 row justify-content-center">
+            <p class="fs-2">Generated response:</p>
+            <div class="typewriter w-auto">
+                <p>{{ resp }}</p>
+            </div>
+            <!--p class="fs-6 typewriter">{{ resp }}</p-->
+            
+        </div>
+
+        
+        
+        <p class="fs-2">Team information:</p>
+        
+        {% for team in team_info %}
+        <div class="d-flex flex-row">
+            <img src="{{ team.logo }}" class="mx-3 img-fluid">
+            <div class="w-25 justify-content-center align-items-center">
+                <p class="fs-6 "><b>Name: </b>{{ team.name }}</p>
+                <p class="fs-6 "><b>Country: </b>{{ team.country }}</p>
+                <p class="fs-6 "><b>Foundation: </b>{{ team.founded }}</p>  
+            </div>
+        
+        </div>
+        {% empty %}
+        <p>No information found</p>
+        {% endfor %}
+        <div class="row justify-content-between my-3 mx-1 py-3">
+            <a class="btn btn-danger w-auto" href="{% url 'home' %}">Go back</a>
+        </div>
+    </div>
+    {% include 'soccer_ai/footer.html' %}
 </body>
 </html>
