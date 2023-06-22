@@ -4,17 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+      
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'soccer_ai/favicon/favicon.ico' %}" >
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    
 </head>
 <body>
+  {% extends 'navbar.html' %}
+ 
+  <section>
+    <div class="w-100 h-100 bg-light">
+        {% for country in countries %}
+        <div class="d-flex flex-row justify-content-center">
+          <img src="{{ country.flag }}" style="width: 50px;">
+          <p class="fs-3">{{ country.name }}</p>
+        </div>
+        {% endfor %}
+      </select>
+    </div>
+  </section>
+  <section>
+    <div class="w-100 row justify-content-center">
+      <form method="post" class="w-50 py-6">
+        {{ form }}
+        <input type="submit" value="Send prompt" class="btn btn-success w-auto">
+      </form>
+    </div>
+  </section>
+  
 
-  <h1>Welcome {{session.userinfo.name}}!</h1>
-  <p><a href="{% url 'logout' %}">Logout</a></p>
-  <div><pre>{{pretty}}</pre></div>
-  <div><img src="{{ img_src }}"></div>
-
-    
 </body>
 </html>
+<script>
+  var lan = document.getElementsByTagName("label");
+  for (i=0;i<lan.length;i++){
+    lan[i].setAttribute("class","form-label");
+  }
+  var ta = document.getElementById("id_input_prompt");
+  ta.setAttribute("class","form-control");
+</script>

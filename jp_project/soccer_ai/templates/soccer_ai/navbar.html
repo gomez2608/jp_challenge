@@ -1,0 +1,18 @@
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+<nav class="container-fluid border-bottom">
+    <div class="d-flex flex-row w-100 py-2 justify-content-between">
+      <div class="d-flex flex-row">
+        <img class="mx-2" src = "{% static 'soccer_ai/objetivo.png' %}" style="width: 50px;">
+        <p class="fs-2 h-auto my-0 py-0 mx-1 fw-bold"> Soccer AI</p>
+      </div>
+      <div class="d-flex flex-row w-25 justify-content-end align-items-center">
+        
+        <a class="btn btn-danger my-1 w-auto mx-1" href="{% url 'logout' %}?next={% url 'login' %}">Salir</a>
+        <img class="mx-1" src="{{ img_src }}" style="width: 50px; border-radius: 25px;">
+      </div>
+    </div>
+  </nav>
