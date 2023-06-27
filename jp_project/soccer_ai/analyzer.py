@@ -96,6 +96,7 @@ class Analyzer:
         return pos_worst,matches_worst_team
     
     def get_win_matches(self, team,entities = ()):
+        team = str(team)
         ds = self.data
         dataset = ds.copy()
         dataset["Date"] = dataset["Date"].apply(lambda x:dt.datetime.strptime(x,"%b %d %Y"))
@@ -114,7 +115,48 @@ class Analyzer:
         visit_winnings = len(matches_visitor[matches_visitor["FT"].apply(lambda x: float(x.split("-")[0])<float(x.split("-")[1]))])
         win_matches = local_winnings + visit_winnings
         return team, win_matches
+    
+    def get_lost_matches(self, team,entities = ()):
+        team = str(team)
+        ds = self.data
+        dataset = ds.copy()
+        dataset["Date"] = dataset["Date"].apply(lambda x:dt.datetime.strptime(x,"%b %d %Y"))
+        if len(entities) > 0:
+            entities = list(map(self.convert_to_dt,entities))
+            if len(entities) > 1:
+                dataset = dataset[(dataset["Date"] >= entities[0]) & (dataset["Date"] <= entities[1])]
+            else:
+                dataset = dataset[(dataset["Date"].dt.year == entities[0].year) & (dataset["Date"].dt.month == entities[0].month) & (dataset["Date"].dt.day == entities[0].day)]
+                if len(dataset) <1:
+                    return ("",0)
         
+        matches_local = dataset[(dataset["Team 1"] == team)]
+        matches_visitor = dataset[(dataset["Team 2"] == team)]
+        local_losses = len(matches_local[matches_local["FT"].apply(lambda x: float(x.split("-")[0])<float(x.split("-")[1]))])
+        visit_losses = len(matches_visitor[matches_visitor["FT"].apply(lambda x: float(x.split("-")[0])>float(x.split("-")[1]))])
+        lost_matches = local_losses + visit_losses
+        return team, lost_matches
+    
+    def get_draw_matches(self, team,entities = ()):
+        team = str(team)
+        ds = self.data
+        dataset = ds.copy()
+        dataset["Date"] = dataset["Date"].apply(lambda x:dt.datetime.strptime(x,"%b %d %Y"))
+        if len(entities) > 0:
+            entities = list(map(self.convert_to_dt,entities))
+            if len(entities) > 1:
+                dataset = dataset[(dataset["Date"] >= entities[0]) & (dataset["Date"] <= entities[1])]
+            else:
+                dataset = dataset[(dataset["Date"].dt.year == entities[0].year) & (dataset["Date"].dt.month == entities[0].month) & (dataset["Date"].dt.day == entities[0].day)]
+                if len(dataset) <1:
+                    return ("",0)
+        
+        matches_local = dataset[(dataset["Team 1"] == team)]
+        matches_visitor = dataset[(dataset["Team 2"] == team)]
+        local_draws = len(matches_local[matches_local["FT"].apply(lambda x: float(x.split("-")[0])==float(x.split("-")[1]))])
+        visit_draws = len(matches_visitor[matches_visitor["FT"].apply(lambda x: float(x.split("-")[0])==float(x.split("-")[1]))])
+        draw_matches = local_draws + visit_draws
+        return team, draw_matches
 
 
 
@@ -138,22 +180,29 @@ class PromptProcessor(Analyzer):
         entit = self.get_entities(prompt)
         print(entit)
         
-        if "best" in entit["ADJ"] or "win" in entit["NOUN"]:
+        if "best" in entit.get("ADJ",[]) or "win" in entit.get("NOUN",[]):
             if entit["ENT"] == None:
                 return self.get_best_team()
             else:
                 return self.get_best_team(entit["ENT"])
         
-        elif "worst" in entit["ADJ"] or "lost" in entit["NOUN"]:
+        elif "worst" in entit.get("ADJ",[]) or "lost" in entit.get("NOUN",[]):
             if entit["ENT"] == None:
                 return self.get_worst_team()
             else:
                 return self.get_worst_team(entit["ENT"])
-        elif "how" in entit["NOUN"] and "lost" in entit["NOUN"]:
-            if entit["ENT"] == None:
-                return self.get_win_matches()
+        elif "how" in list(map(lambda x:x.lower(),entit.get("SCONJ",[]))):
+            entities = list(entit["ENT"])
+            team = entities.pop(0)
+            if "lost" in entit.get("VERB",[]):
+                return self.get_lost_matches(team,entities)
+            elif "won" in entit.get("VERB",[]):
+                return self.get_win_matches(team, entities)
+            elif "drawn" in entit.get("VERB",[]):
+                return self.get_draw_matches(team, entities)
             else:
-                return self.get_win_matches(entit["ENT"])
+                return ("",0)
+
     
 class ResponseGenerator(PromptProcessor):
 
@@ -205,27 +254,35 @@ class ResponseGenerator(PromptProcessor):
 
     def generate_response(self,prompt):
         ans = self.get_answer(prompt)
+
+        print(ans)
+
         entit = self.get_entities(prompt)
 
         team, matches = ans
 
-        if team == "":
+        if str(team) == "":
             return "There is no matches in the indicated date."
         else:
-            adj = entit["ADJ"][0]
-            desc = "won" if adj == "best" else "lost"
-            if len(entit["ENT"]) == 0:
-                pro = f"Write a sentence saying that the {adj} team in the Bundesliga is {team} with {matches} {desc} matches"
+
+            if not "How" in entit.get("SCONJ",[]):
+                adj = entit["ADJ"][0]
+                desc = "won" if adj == "best" else "lost"
+                if len(entit["ENT"]) == 0:
+                    pro = f"Write a sentence saying that the {adj} team in the Bundesliga is {team} with {matches} {desc} matches"
+                    
                 
-            
-            elif len(entit["ENT"]) == 1:
-                ent = entit["ENT"][0]
-                pro = f"Write a sentence saying that the {adj} team in the Bundesliga in {ent} is {team} with {matches} {desc} matches"
-                
+                elif len(entit["ENT"]) == 1:
+                    ent = entit["ENT"][0]
+                    pro = f"Write a sentence saying that the {adj} team in the Bundesliga in {ent} is {team} with {matches} {desc} matches"
+                    
+                else:
+                    ent0, ent1 = entit["ENT"]
+                    pro = f"Write a sentence saying that the {adj} team in the Bundesliga between {ent0} and {ent1} is {team} with {matches} {desc} matches"
             else:
-                ent0, ent1 = entit["ENT"]
-                pro = f"Write a sentence saying that the {adj} team in the Bundesliga between {ent0} and {ent1} is {team} with {matches} {desc} matches"
-                      
+                ver = entit.get("VERB",[])[1]
+                ent = entit["ENT"][0]
+                pro = f"Write a sentence saying that the number of matches that {team} has {ver} in the Bundesliga in {ent} is {matches}"    
             self.payload["prompt"] = pro
             response = requests.post(self.url, json=self.payload, headers=self.headers)
             obj = json.loads(response.text)

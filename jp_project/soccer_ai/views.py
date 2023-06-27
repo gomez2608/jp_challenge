@@ -99,9 +99,13 @@ class AnalizerView(View):
             resp = "There is no suministred prompt"
 
         info_g = []
-        for i in team_info:
-            info_t = get_info(i,team_ids)
-            info_g.append(info_t)
+        if type(team_info) == list:
+            for i in team_info:
+                info_t = get_info(str(i),team_ids)
+                info_g.append(info_t)
+        else:
+            info_g = [get_info(str(team_info),team_ids),]
+        print(info_g)
         return render(request,"soccer_ai/ans_view.html",{"resp":resp,"img_src":img_src,"team_info":info_g})
     
 def get_info(team,list_ids):
