@@ -269,20 +269,20 @@ class ResponseGenerator(PromptProcessor):
                 adj = entit["ADJ"][0]
                 desc = "won" if adj == "best" else "lost"
                 if len(entit["ENT"]) == 0:
-                    pro = f"Write a sentence saying that the {adj} team in the Bundesliga is {team} with {matches} {desc} matches"
+                    pro = f"Write a short sentence saying that the {adj} team in the Bundesliga is {team} with {matches} {desc} matches"
                     
                 
                 elif len(entit["ENT"]) == 1:
                     ent = entit["ENT"][0]
-                    pro = f"Write a sentence saying that the {adj} team in the Bundesliga in {ent} is {team} with {matches} {desc} matches"
+                    pro = f"Write a short sentence saying that the {adj} team in the Bundesliga in {ent} is {team} with {matches} {desc} matches"
                     
                 else:
                     ent0, ent1 = entit["ENT"]
-                    pro = f"Write a sentence saying that the {adj} team in the Bundesliga between {ent0} and {ent1} is {team} with {matches} {desc} matches"
+                    pro = f"Write a short sentence saying that the {adj} team in the Bundesliga between {ent0} and {ent1} is {team} with {matches} {desc} matches"
             else:
                 ver = entit.get("VERB",[])[1]
                 ent = entit["ENT"][0]
-                pro = f"Write a sentence saying that the number of matches that {team} has {ver} in the Bundesliga in {ent} is {matches}"    
+                pro = f"Write a short sentence saying that the number of matches that {team} has {ver} in the Bundesliga in {ent} is {matches}"    
             self.payload["prompt"] = pro
             response = requests.post(self.url, json=self.payload, headers=self.headers)
             obj = json.loads(response.text)
